@@ -50,8 +50,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            hu3rror/memos-litestream
-            ghcr.io/hu3rror/memos-litestream
+            pquill/memos-litestream
+            ghcr.io/gitkeniwo/memos-litestream
           tags: |
             type=raw,value=stable
             type=semver,pattern={{version}},value=${{ steps.keydb.outputs.release }}
