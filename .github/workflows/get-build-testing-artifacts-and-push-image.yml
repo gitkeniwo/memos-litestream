@@ -2,7 +2,7 @@ name: get-build-testing-artifacts-and-push-image
 
 on:
   schedule:
-    - cron:  '15 4 * * *'
+    - cron:  '15 4,16 * * *'
   workflow_dispatch:
 
 jobs:
