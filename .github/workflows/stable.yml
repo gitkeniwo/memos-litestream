@@ -43,7 +43,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/gitkeniwo/memos-litestream
+            ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=stable
             type=semver,pattern={{version}},value=${{ steps.keydb.outputs.release }}
