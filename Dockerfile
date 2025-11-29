@@ -46,6 +46,9 @@ RUN if [ "$USE_MEMOGRAM" = "1" ]; then \
     chmod +x ./memogram; \
     fi
 
+# Install sqlite3 CLI for DB maintenance (VACUUM, etc)
+RUN apk add --no-cache sqlite
+
 # Define ENV
 ENV TZ="UTC"
 ENV MEMOS_PORT="5230"
