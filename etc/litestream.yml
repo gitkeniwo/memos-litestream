@@ -5,4 +5,14 @@ dbs:
         bucket: $LITESTREAM_REPLICA_BUCKET
         path: $LITESTREAM_REPLICA_PATH
         endpoint: $LITESTREAM_REPLICA_ENDPOINT
+        access-key-id: $LITESTREAM_ACCESS_KEY_ID
+        secret-access-key: $LITESTREAM_SECRET_ACCESS_KEY
         force-path-style: true
+
+        # Reduce Class C requests and save costs
+        sync-interval: 1h          # WAL sync every hour
+        snapshot-interval: 12h     # Full snapshot every 12 hours
+        retention: 48h             # Retain snapshots & WAL for 48 hours
+
+        # Avoid listing generations and checking snapshots on every sync
+        skip-verify: true
