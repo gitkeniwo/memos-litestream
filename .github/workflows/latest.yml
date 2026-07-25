@@ -17,6 +17,16 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      # Both variants are independent; a memogram build failure should not
+      # cancel the plain canary image.
+      fail-fast: false
+      matrix:
+        include:
+          - tag: canary
+            use_memogram: "0"
+          - tag: canary-memogram
+            use_memogram: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +51,7 @@ jobs:
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=canary
+            type=raw,value=${{ matrix.tag }}
 
       - name: Build and Push
         id: docker_build
@@ -50,7 +60,9 @@ jobs:
           context: ./
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: MEMOS_IMAGE_TAG=canary
+          build-args: |
+            MEMOS_IMAGE_TAG=canary
+            USE_MEMOGRAM=${{ matrix.use_memogram }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
