@@ -1,4 +1,8 @@
-ARG LITESTREAM_IMAGE_TAG=0.3.13
+# NOTE: 0.5.x is a breaking change from 0.3.x -- both the config file format and
+# the on-disk replica format. etc/litestream.yml must stay in sync with this, and
+# a 0.5 replica cannot be restored by 0.3 (or vice versa), so switching versions
+# means pointing LITESTREAM_REPLICA_PATH at a fresh prefix.
+ARG LITESTREAM_IMAGE_TAG=0.5.15
 ARG MEMOS_IMAGE_TAG=0.29.1
 
 # Get litestream image

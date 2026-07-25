@@ -1,8 +1,52 @@
+# Litestream 0.5.x configuration.
+#
+# 0.5 replaced the 0.3 WAL/generation model with LTX files plus LSM-style
+# compaction levels. Two things to know before editing:
+#
+#  1. Litestream does NOT reject unknown config keys. The 0.3-era replica options
+#     `snapshot-interval` and `retention` parse fine here and then do nothing at
+#     all. Their 0.5 equivalents are the top-level `snapshot:` block below.
+#  2. B2 Class C (ListObjectsV2) usage is driven by the monitors below, NOT by
+#     `sync-interval`. With 0.5 defaults (L0 retention check every 15s, L1
+#     compaction every 30s) an *idle* database measured ~14,600 list calls/day --
+#     about 6x the 2,500/day B2 free allowance. The settings below measured ~35.
+
+# Full-database snapshots. A restore is "newest snapshot + every LTX file after
+# it", so this bounds how much has to be replayed. Appears as compaction level 9.
+snapshot:
+  interval: 24h
+  retention: 72h
+
+# L0 files are the raw per-sync increments. Once compacted into L1 they are
+# redundant and are deleted after this grace period. The default 15s check
+# interval was the single largest source of list calls.
+l0-retention: 6h
+l0-retention-check-interval: 6h
+
+# Compaction merges many small files into fewer large ones, which is what keeps a
+# restore from having to fetch thousands of tiny objects. Defaults are
+# 30s / 5m / 1h; longer intervals mean fewer list calls but leave more
+# uncompacted L0 files for a restore to replay.
+levels:
+  - interval: 6h    # L1
+  - interval: 12h   # L2
+  - interval: 24h   # L3
+
 dbs:
   - path: $DB_PATH
-    replicas:
-      - type: s3
-        bucket: $LITESTREAM_REPLICA_BUCKET
-        path: $LITESTREAM_REPLICA_PATH
-        endpoint: $LITESTREAM_REPLICA_ENDPOINT
-        force-path-style: true
+    # 0.5 supports one replica per database: `replica`, not `replicas`.
+    replica:
+      type: s3
+      bucket: $LITESTREAM_REPLICA_BUCKET
+      path: $LITESTREAM_REPLICA_PATH
+      endpoint: $LITESTREAM_REPLICA_ENDPOINT
+      access-key-id: $LITESTREAM_ACCESS_KEY_ID
+      secret-access-key: $LITESTREAM_SECRET_ACCESS_KEY
+
+      # Uploads are B2 Class A (free) and steady-state syncs were measured to
+      # make zero list calls, so a tight RPO costs nothing here.
+      sync-interval: 5m
+
+      # force-path-style is auto-detected for B2 endpoints in 0.5+, so it is
+      # omitted. Do NOT add `skip-verify` -- despite how it reads, it sets
+      # InsecureSkipVerify and disables TLS certificate verification.
