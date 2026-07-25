@@ -1,3 +1,7 @@
+# Builds the release image from the memos version pinned in the Dockerfile.
+#
+# Both variants (with and without the Telegram bot) are produced by one matrix,
+# mirroring canary.yml.
 name: Upstream stable image
 
 on:
@@ -17,20 +21,38 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      # The two variants are independent; a memogram build failure should not
+      # cancel the plain stable image.
+      fail-fast: false
+      matrix:
+        include:
+          - tag: stable
+            suffix: ""
+            use_memogram: "0"
+          - tag: stable-memogram
+            suffix: "-memogram"
+            use_memogram: "1"
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Extract build args
-        id: keydb
-        uses: pozetroninc/github-action-get-latest-release@v0.8.0
-        with:
-          owner: usememos
-          repo: memos
-          excludes: prerelease, draft
-          token: ${{ github.token }}
+      # The version tag must come from the same place the build does, i.e. the
+      # Dockerfile pin that depup maintains. Querying the memos GitHub release
+      # separately would mislabel the image whenever depup's PR has not merged
+      # yet -- it would tag a 0.29.1 build as 0.30.0.
+      - name: Read pinned memos version from Dockerfile
+        id: memos
+        run: |
+          version="$(sed -n 's/^ARG MEMOS_IMAGE_TAG=//p' Dockerfile)"
+          if [ -z "$version" ] || [ "$(printf '%s\n' "$version" | wc -l)" -ne 1 ]; then
+            echo "could not read a single MEMOS_IMAGE_TAG from Dockerfile, got: '$version'" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "memos version: $version"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -49,10 +71,13 @@ jobs:
         with:
           images: |
             ghcr.io/${{ github.repository }}
+          # latest=false keeps this explicit: `:latest` is not maintained by any
+          # workflow here. Use `:stable` (releases) or `:canary` (rolling dev).
+          flavor: |
+            latest=false
           tags: |
-            type=raw,value=stable
-            type=semver,pattern={{version}},value=${{ steps.keydb.outputs.release }}
-            # type=semver,pattern={{major}}.{{minor}},value=${{ steps.keydb.outputs.release }}
+            type=raw,value=${{ matrix.tag }}
+            type=semver,pattern={{version}},value=${{ steps.memos.outputs.version }}${{ matrix.suffix }}
 
       - name: Build and Push
         id: docker_build
@@ -61,6 +86,8 @@ jobs:
           context: ./
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            USE_MEMOGRAM=${{ matrix.use_memogram }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
