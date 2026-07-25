@@ -35,7 +35,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/hu3rror/memos-litestream
+            ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=0.24.2-memogram-testing
 

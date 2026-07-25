@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'Dockerfile'
+      - 'etc/**'
+      - 'scripts/**'
   workflow_dispatch:
 
 jobs:
@@ -42,7 +44,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/hu3rror/memos-litestream
+            ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=stable-memogram
             type=semver,pattern={{version}},value=${{ steps.keydb.outputs.release }}-memogram

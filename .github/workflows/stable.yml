@@ -4,6 +4,11 @@ on:
   push:
     paths:
       - 'Dockerfile'
+      # The litestream config and startup scripts are baked into the image, so a
+      # change to them must rebuild it too -- otherwise editing etc/litestream.yml
+      # silently has no effect on the published :stable tag.
+      - 'etc/**'
+      - 'scripts/**'
   workflow_dispatch:
 
 jobs:
@@ -43,7 +48,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/hu3rror/memos-litestream
+            ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=stable
             type=semver,pattern={{version}},value=${{ steps.keydb.outputs.release }}
