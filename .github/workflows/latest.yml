@@ -1,4 +1,10 @@
-name: Upstream latest image
+# Tracks the rolling development build of memos.
+#
+# Upstream renamed this stream from `latest` to `canary`. `latest` still exists
+# in ghcr.io/usememos/memos but is frozen at an old digest (verified: its digest
+# matches neither `canary` nor `stable`), so building from it would silently pin
+# a stale memos forever.
+name: Upstream canary image
 
 on:
   schedule:
@@ -35,7 +41,7 @@ jobs:
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest
+            type=raw,value=canary
 
       - name: Build and Push
         id: docker_build
@@ -44,7 +50,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: MEMOS_IMAGE_TAG=latest
+          build-args: MEMOS_IMAGE_TAG=canary
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
