@@ -3,7 +3,7 @@
 # a 0.5 replica cannot be restored by 0.3 (or vice versa), so switching versions
 # means pointing LITESTREAM_REPLICA_PATH at a fresh prefix.
 ARG LITESTREAM_IMAGE_TAG=0.5.15
-ARG MEMOS_IMAGE_TAG=0.29.1
+ARG MEMOS_IMAGE_TAG=0.30.0
 
 # Get litestream image
 FROM docker.io/litestream/litestream:${LITESTREAM_IMAGE_TAG} AS litestream_package
