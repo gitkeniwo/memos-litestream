@@ -2,7 +2,7 @@
 # the on-disk replica format. etc/litestream.yml must stay in sync with this, and
 # a 0.5 replica cannot be restored by 0.3 (or vice versa), so switching versions
 # means pointing LITESTREAM_REPLICA_PATH at a fresh prefix.
-ARG LITESTREAM_IMAGE_TAG=0.5.16
+ARG LITESTREAM_IMAGE_TAG=0.5.17
 ARG MEMOS_IMAGE_TAG=0.30.0
 
 # Get litestream image
