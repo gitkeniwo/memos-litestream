@@ -1,0 +1,9 @@
+# Keep the build context small and free of local/secret files.
+.git
+.github
+
+# flyctl launch added from .gitignore
+**/.env
+**/*.tar.gz
+**/*.zip
+fly.toml
