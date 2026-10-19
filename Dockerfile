@@ -55,9 +55,9 @@ ENV MEMOGRAM_TAG=26.10.0
 
 RUN if [ "$USE_MEMOGRAM" = "1" ]; then \
     apk add --no-cache gcompat procps wget && \
-    wget https://github.com/usememos/telegram-integration/releases/download/v${MEMOGRAM_TAG}/memogram_v${MEMOGRAM_TAG}_linux_${TARGETARCH}.tar.gz && \
-    tar -xvf memogram_v${MEMOGRAM_TAG}_linux_${TARGETARCH}.tar.gz -C /usr/local/memos && \
-    rm memogram_v${MEMOGRAM_TAG}_linux_${TARGETARCH}.tar.gz && \
+    wget https://github.com/usememos/telegram-integration/releases/download/${MEMOGRAM_TAG}/memogram_${MEMOGRAM_TAG}_linux_${TARGETARCH}.tar.gz && \
+    tar -xvf memogram_${MEMOGRAM_TAG}_linux_${TARGETARCH}.tar.gz -C /usr/local/memos && \
+    rm memogram_${MEMOGRAM_TAG}_linux_${TARGETARCH}.tar.gz && \
     chmod +x /usr/local/memos/memogram; \
     fi
 
